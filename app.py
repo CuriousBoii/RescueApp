@@ -113,21 +113,20 @@ def volunteer_register():
         print(volunteer)
         flash("Volunteer registered successfully!")
         return redirect(url_for("volunteer_list"))
-    
     return render_template("volunteer_register.html")
 
-@volunteering.route("/list")
+@app.route("/volunteer/list", methods=["GET"])
 @catch_errors
 def volunteer_list():
     volunteers = Volunteer.query.all()
     return render_template("volunteer_list.html", volunteers=volunteers)
 
-@volunteering.route("/<int:volunteer_id>")
+@app.route("/volunteer/<int:volunteer_id>", methods=["GET"])
 def volunteer_details(volunteer_id):
     volunteer = Volunteer.query.get_or_404(volunteer_id)
     return render_template("volunteer_details.html", volunteer=volunteer)
 
-@volunteering.route("/<int:volunteer_id>/update", methods=["GET","POST"])
+@app.route("/volunteer/<int:volunteer_id>/update", methods=["GET","POST"])
 def volunteer_status_update(volunteer_id):
     volunteer = Volunteer.query.get_or_404(volunteer_id)
     if request.method == "POST":
@@ -142,12 +141,12 @@ def volunteer_status_update(volunteer_id):
         return redirect(url_for("volunteer_status_update", volunteer_id=volunteer.id))
     return render_template("volunteer_update.html", volunteer=volunteer)
 
-@teaming.route("/allTeams", methods=["GET"])
+@app.route("/team/list")
 def teams():
     teams = Team.query.all()
     return render_template("teams.html", teams=teams)
 
-@teaming.route("/<int:team_id>/update", methods=["GET", "POST"])
+@app.route("team/<int:team_id>/update", methods=["GET", "POST"])
 def team(team_id):
     team = Team.query.get_or_404(team_id)
     if request.method == "POST":
@@ -159,7 +158,7 @@ def team(team_id):
     return render_template("team.html", team=team)
 
 
-@teaming.route("/team/add", methods=["GET", "POST"])
+@app.route("/team/add", methods=["GET", "POST"])
 def add_team():
     if request.method == "POST":
         team = Team(name=request.form["name"], description=request.form["description"])
