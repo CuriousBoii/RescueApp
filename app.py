@@ -1,5 +1,5 @@
 import datetime as dt
-from flask import Flask, flash
+from flask import Blueprint, Flask, flash
 from flask_sqlalchemy import SQLAlchemy
 from enum import Enum
 from flask import request, render_template, redirect, url_for
@@ -10,6 +10,10 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///rescue.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['SECRET_KEY'] = 'zaq12345'
 db = SQLAlchemy(app)
+
+teaming = Blueprint('team', __name__, url_prefix='/team')
+volunteering = Blueprint('volunteer', __name__, url_prefix='/volunteer')
+
 
 class TeamStatus(Enum):
     ACTIVE = "Active"
@@ -30,17 +34,19 @@ class Volunteer(db.Model):
     phone = db.Column(db.String(20), nullable=False)
     telegram_contact = db.Column(db.String(100), nullable=True)
     skills = db.Column(db.Text, nullable=True)
-    TeamID = db.Column(db.Integer, nullable=True, default = 0)
+    TeamID = db.Column(db.Integer, db.ForeignKey('team.TeamID'))
     description = db.Column(db.Text, nullable=True)
+    
 
 class Team(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, unique=True)
+    TeamID = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=True)
     job = db.Column(db.String(100), nullable=False)
-    status = db.Column(db.Enum(TeamStatus), nullable=False, default=TeamStatus.ACTIVE)
+    status = db.Column(db.Enum(TeamStatus), nullable=False, default=TeamStatus.INACTIVE)
     composition = db.Column(db.Text, nullable=True)  # stores team composition (e.g. list of volunteer roles)
     point_of_contact = db.Column(db.String(100), nullable=True)  # stores team point of contact (e.g. name, email, phone)
-    volunteers = db.Column(db.String(100), nullable=True)  # stores list of volunteer IDs
+    volunteers = db.relationship('Volunteer', backref='team', lazy=True)
+
 
 
 def catch_errors(func):
@@ -89,26 +95,17 @@ def incident():
     return render_template("incident.html")
 
 
-@app.route("/volunteer/register", methods=["GET", "POST"])
+@volunteering.route("/register", methods=["GET", "POST"])
 @catch_errors
 def volunteer_register():
     if request.method == "POST":
-        print("working")
         print(str(request.form))
         name = request.form["name"]
-        print(name)
         email = request.form["email"]
-        print(name, email)
         phone = request.form["phone"]
-        print(name, email, phone)
         telegram_contact = request.form["telegram_contact"]
-        print(name, email, phone, telegram_contact)
         skills = request.form["skills"]
-        print(name, email, phone, 
-                        skills)
         description = request.form["description"]
-        print(name, email, phone, 
-                        telegram_contact, skills, description)
         volunteer = Volunteer(name=name, email=email, phone=phone, 
                         telegram_contact=telegram_contact, skills=skills, description=description)
         db.session.add(volunteer)
@@ -119,20 +116,67 @@ def volunteer_register():
     
     return render_template("volunteer_register.html")
 
-@app.route("/volunteer/list")
+@volunteering.route("/list")
+@catch_errors
 def volunteer_list():
     volunteers = Volunteer.query.all()
     return render_template("volunteer_list.html", volunteers=volunteers)
 
-@app.route("/volunteer/<int:volunteer_id>")
+@volunteering.route("/<int:volunteer_id>")
 def volunteer_details(volunteer_id):
     volunteer = Volunteer.query.get_or_404(volunteer_id)
     return render_template("volunteer_details.html", volunteer=volunteer)
 
-@app.route("/volunteer/<int:volunteer_id>/status", methods=["POST"])
+@volunteering.route("/<int:volunteer_id>/update", methods=["GET","POST"])
 def volunteer_status_update(volunteer_id):
     volunteer = Volunteer.query.get_or_404(volunteer_id)
-    volunteer.TeamID = request.form["TeamID"]
-    db.session.commit()
-    flash("Volunteer status updated successfully!")
-    return redirect(url_for("volunteer_status_update"))
+    if request.method == "POST":
+        volunteer.name = request.form["name"]
+        volunteer.email = request.form["email"]
+        volunteer.phone = request.form["phone"]
+        volunteer.TeamID = request.form["TeamID"]
+        volunteer.skills = request.form["skills"]
+        volunteer.description = request.form["description"]
+        db.session.commit()
+        flash("Volunteer status updated successfully!")
+        return redirect(url_for("volunteer_status_update", volunteer_id=volunteer.id))
+    return render_template("volunteer_update.html", volunteer=volunteer)
+
+@teaming.route("/allTeams", methods=["GET"])
+def teams():
+    teams = Team.query.all()
+    return render_template("teams.html", teams=teams)
+
+@teaming.route("/<int:team_id>/update", methods=["GET", "POST"])
+def team(team_id):
+    team = Team.query.get_or_404(team_id)
+    if request.method == "POST":
+        team.name = request.form["name"]
+        team.description = request.form["description"]
+        db.session.commit()
+        flash("Team updated successfully!")
+        return redirect(url_for("teams"))
+    return render_template("team.html", team=team)
+
+
+@teaming.route("/team/add", methods=["GET", "POST"])
+def add_team():
+    if request.method == "POST":
+        team = Team(name=request.form["name"], description=request.form["description"])
+        db.session.add(team)
+        db.session.commit()
+        flash("Team added successfully!")
+        return redirect(url_for("teams"))
+    return render_template("add_team.html")
+
+
+
+
+
+
+
+
+
+
+app.register_blueprint(teaming)
+app.register_blueprint(volunteering)

@@ -1,0 +1,39 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="mt-5">Update Volunteer Information</h1>
+        <form method="post">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" class="form-control" value="{{ volunteer.name }}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" class="form-control" value="{{ volunteer.email }}" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone:</label>
+                <input type="tel" id="phone" name="phone" class="form-control" value="{{ volunteer.phone }}" required>
+            </div>
+            <div class="form-group">
+                <label for="telegram_contact">Telegram Contact:</label>
+                <input type="tel" id="telegram_contact" name="telegram_contact" class="form-control" value="{{ volunteer.telegram_contact }}" required>
+            </div>
+            <div class="form-group">
+                <label for="skills">Skills:</label>
+                <input type="text" id="skills" name="skills" class="form-control" value="{{ volunteer.skills }}" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <input type="text" id="description" name="description" class="form-control" value="{{ volunteer.description }}" required>
+            </div>
+            <div class="form-group">
+                <label for="TeamID">TeamID:</label>
+                <input type="text" id="TeamID" name="TeamID" class="form-control" value="{{ volunteer.TeamID }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+    </div>
+    {% endblock %}

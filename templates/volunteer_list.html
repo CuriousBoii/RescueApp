@@ -1,7 +1,7 @@
 
     {% extends 'base.html' %}
 
-{% block content %}
+    {% block content %}
     <div class="container">
         <h1 class="mt-5">Volunteer List</h1>
         <table class="table table-striped">
@@ -27,7 +27,7 @@
                         <a href="{{ url_for('volunteer_status_update', volunteer_id=volunteer.id) }}" class="btn btn-secondary">Update Details</a>
                     </td>
                 </tr>
-                
+                {% endfor %}
             </tbody>
         </table>
     </div>
