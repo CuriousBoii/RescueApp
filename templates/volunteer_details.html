@@ -1,0 +1,15 @@
+
+    {% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="mt-5">Volunteer Details</h1>
+        <h2>{{ volunteer.name }}</h2>
+        <p>Email: {{ volunteer.email }}</p>
+        <p>Phone: {{ volunteer.phone }}</p>
+        <p>TeamID: {{ volunteer.TeamID }}</p>
+        <p>Skills: {{ volunteer.skills}}</p>
+        <a href="{{ url_for('volunteer_status_update', volunteer_id=volunteer.id) }}" class="btn btn-secondary">Update Details</a>
+    </div>
+    
+    {% endblock %}

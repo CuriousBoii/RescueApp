@@ -30,7 +30,7 @@ class Volunteer(db.Model):
     phone = db.Column(db.String(20), nullable=False)
     telegram_contact = db.Column(db.String(100), nullable=True)
     skills = db.Column(db.Text, nullable=True)
-    job = db.Column(db.String(100), nullable=True)
+    TeamID = db.Column(db.Integer, nullable=True, default = 0)
     description = db.Column(db.Text, nullable=True)
 
 class Team(db.Model):
@@ -93,15 +93,46 @@ def incident():
 @catch_errors
 def volunteer_register():
     if request.method == "POST":
+        print("working")
+        print(str(request.form))
         name = request.form["name"]
+        print(name)
         email = request.form["email"]
+        print(name, email)
         phone = request.form["phone"]
-        
-        volunteer = Volunteer(name=name, email=email, phone=phone)
+        print(name, email, phone)
+        telegram_contact = request.form["telegram_contact"]
+        print(name, email, phone, telegram_contact)
+        skills = request.form["skills"]
+        print(name, email, phone, 
+                        skills)
+        description = request.form["description"]
+        print(name, email, phone, 
+                        telegram_contact, skills, description)
+        volunteer = Volunteer(name=name, email=email, phone=phone, 
+                        telegram_contact=telegram_contact, skills=skills, description=description)
         db.session.add(volunteer)
         db.session.commit()
-        
+        print(volunteer)
         flash("Volunteer registered successfully!")
         return redirect(url_for("volunteer_list"))
     
     return render_template("volunteer_register.html")
+
+@app.route("/volunteer/list")
+def volunteer_list():
+    volunteers = Volunteer.query.all()
+    return render_template("volunteer_list.html", volunteers=volunteers)
+
+@app.route("/volunteer/<int:volunteer_id>")
+def volunteer_details(volunteer_id):
+    volunteer = Volunteer.query.get_or_404(volunteer_id)
+    return render_template("volunteer_details.html", volunteer=volunteer)
+
+@app.route("/volunteer/<int:volunteer_id>/status", methods=["POST"])
+def volunteer_status_update(volunteer_id):
+    volunteer = Volunteer.query.get_or_404(volunteer_id)
+    volunteer.TeamID = request.form["TeamID"]
+    db.session.commit()
+    flash("Volunteer status updated successfully!")
+    return redirect(url_for("volunteer_status_update"))

@@ -1,0 +1,34 @@
+
+    {% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="mt-5">Volunteer List</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Team ID</th>
+                    <th>Skills</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for volunteer in volunteers %}
+                <tr>
+                    <td>{{ volunteer.name }}</td>
+                    <td>{{ volunteer.email }}</td>
+                    <td>{{ volunteer.phone }}</td>
+                    <td>{{ volunteer.TeamID }}</td>
+                    <td>{{ volunteer.skills}}</td>
+                    <td>
+                        <a href="{{ url_for('volunteer_details', volunteer_id=volunteer.id) }}" class="btn btn-primary">View</a>
+                        <a href="{{ url_for('volunteer_status_update', volunteer_id=volunteer.id) }}" class="btn btn-secondary">Update Details</a>
+                    </td>
+                </tr>
+                
+            </tbody>
+        </table>
+    </div>
+    {% endblock %}
