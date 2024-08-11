@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from enum import Enum
 from flask import request, render_template, redirect, url_for
 import pytz
+from telegramBot import add_volunteer_to_group
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///rescue.db"
@@ -110,6 +111,7 @@ def volunteer_register():
                         telegram_contact=telegram_contact, skills=skills, description=description)
         db.session.add(volunteer)
         db.session.commit()
+        add_volunteer_to_group(telegram_contact)
         print(volunteer)
         flash("Volunteer registered successfully!")
         return redirect(url_for("volunteer_list"))
@@ -146,7 +148,7 @@ def teams():
     teams = Team.query.all()
     return render_template("teams.html", teams=teams)
 
-@app.route("team/<int:team_id>/update", methods=["GET", "POST"])
+@app.route("/team/<int:team_id>/update", methods=["GET", "POST"])
 def team(team_id):
     team = Team.query.get_or_404(team_id)
     if request.method == "POST":
